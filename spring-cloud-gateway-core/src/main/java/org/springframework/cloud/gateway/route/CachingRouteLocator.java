@@ -100,7 +100,7 @@ public class CachingRouteLocator implements Ordered, RouteLocator,
 	}
 
 	@Deprecated
-	/* for testing */ void handleRefresh() {
+		/* for testing */ void handleRefresh() {
 		refresh();
 	}
 

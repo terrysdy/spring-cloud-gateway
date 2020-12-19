@@ -40,7 +40,7 @@ import static org.springframework.cloud.gateway.support.ServerWebExchangeUtils.G
 /**
  * WebHandler that delegates to a chain of {@link GlobalFilter} instances and
  * {@link GatewayFilterFactory} instances then to the target {@link WebHandler}.
- *
+ * 统一的 handler 处理
  * @author Rossen Stoyanchev
  * @author Spencer Gibb
  * @since 0.1
@@ -49,6 +49,7 @@ public class FilteringWebHandler implements WebHandler {
 
 	protected static final Log logger = LogFactory.getLog(FilteringWebHandler.class);
 
+	// 所有的全局 filter
 	private final List<GatewayFilter> globalFilters;
 
 	public FilteringWebHandler(List<GlobalFilter> globalFilters) {
@@ -57,6 +58,7 @@ public class FilteringWebHandler implements WebHandler {
 
 	private static List<GatewayFilter> loadFilters(List<GlobalFilter> filters) {
 		return filters.stream().map(filter -> {
+			// 将 GlobalFilter 适配成 GatewayFilter
 			GatewayFilterAdapter gatewayFilter = new GatewayFilterAdapter(filter);
 			if (filter instanceof Ordered) {
 				int order = ((Ordered) filter).getOrder();
@@ -76,6 +78,7 @@ public class FilteringWebHandler implements WebHandler {
 		Route route = exchange.getRequiredAttribute(GATEWAY_ROUTE_ATTR);
 		List<GatewayFilter> gatewayFilters = route.getFilters();
 
+		// 全局 filter + route 的 filter 组成 filter 链
 		List<GatewayFilter> combined = new ArrayList<>(this.globalFilters);
 		combined.addAll(gatewayFilters);
 		// TODO: needed or cached?
@@ -92,6 +95,7 @@ public class FilteringWebHandler implements WebHandler {
 
 		private final int index;
 
+		// 没给 chain 都保留了完整的 filter
 		private final List<GatewayFilter> filters;
 
 		DefaultGatewayFilterChain(List<GatewayFilter> filters) {
@@ -111,8 +115,10 @@ public class FilteringWebHandler implements WebHandler {
 		@Override
 		public Mono<Void> filter(ServerWebExchange exchange) {
 			return Mono.defer(() -> {
+				// 执行 filter 链
 				if (this.index < filters.size()) {
 					GatewayFilter filter = filters.get(this.index);
+					// 下一个 chain 的 index + 1，下一个 chain 的 filter 方法则调用下一个 filter
 					DefaultGatewayFilterChain chain = new DefaultGatewayFilterChain(this,
 							this.index + 1);
 					return filter.filter(exchange, chain);

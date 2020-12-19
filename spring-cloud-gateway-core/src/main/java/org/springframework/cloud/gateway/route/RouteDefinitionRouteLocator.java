@@ -166,6 +166,7 @@ public class RouteDefinitionRouteLocator
 	}
 
 	private Route convertToRoute(RouteDefinition routeDefinition) {
+		// 根据 routeDefinition 解析 Predicate 及 filter 链
 		AsyncPredicate<ServerWebExchange> predicate = combinePredicates(routeDefinition);
 		List<GatewayFilter> gatewayFilters = getFilters(routeDefinition);
 

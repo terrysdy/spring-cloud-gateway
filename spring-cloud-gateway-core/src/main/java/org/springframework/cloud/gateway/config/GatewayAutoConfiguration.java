@@ -167,10 +167,10 @@ import static org.springframework.cloud.gateway.config.HttpClientProperties.Pool
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnProperty(name = "spring.cloud.gateway.enabled", matchIfMissing = true)
 @EnableConfigurationProperties
-@AutoConfigureBefore({ HttpHandlerAutoConfiguration.class,
-		WebFluxAutoConfiguration.class })
-@AutoConfigureAfter({ GatewayLoadBalancerClientAutoConfiguration.class,
-		GatewayClassPathWarningAutoConfiguration.class })
+@AutoConfigureBefore({HttpHandlerAutoConfiguration.class,
+		WebFluxAutoConfiguration.class})
+@AutoConfigureAfter({GatewayLoadBalancerClientAutoConfiguration.class,
+		GatewayClassPathWarningAutoConfiguration.class})
 @ConditionalOnClass(DispatcherHandler.class)
 public class GatewayAutoConfiguration {
 
@@ -185,6 +185,10 @@ public class GatewayAutoConfiguration {
 		return new RouteLocatorBuilder(context);
 	}
 
+	/**
+	 * === RouteDefinitionLocator start ===
+	 *
+	 */
 	@Bean
 	@ConditionalOnMissingBean
 	public PropertiesRouteDefinitionLocator propertiesRouteDefinitionLocator(
@@ -200,11 +204,19 @@ public class GatewayAutoConfiguration {
 
 	@Bean
 	@Primary
+	/**
+	 * 依赖其他 RouteDefinitionLocator，组合其他所有 RouteDefinition<br>
+	 * 以 CompositeRouteLocator 为 primary，其他依赖 RouteDefinitionLocator 的地方注入的就是 CompositeRouteLocator，通过它可以访问到所有 RouteDefinition
+	 */
 	public RouteDefinitionLocator routeDefinitionLocator(
 			List<RouteDefinitionLocator> routeDefinitionLocators) {
 		return new CompositeRouteDefinitionLocator(
 				Flux.fromIterable(routeDefinitionLocators));
 	}
+
+	/**
+	 * === RouteDefinitionLocator end ===
+	 */
 
 	@Bean
 	public ConfigurationService gatewayConfigurationService(BeanFactory beanFactory,
@@ -213,6 +225,9 @@ public class GatewayAutoConfiguration {
 		return new ConfigurationService(beanFactory, conversionService, validator);
 	}
 
+	/**
+	 * === RouteLocator start ===
+	 */
 	@Bean
 	public RouteLocator routeDefinitionRouteLocator(GatewayProperties properties,
 			List<GatewayFilterFactory> gatewayFilters,
@@ -231,6 +246,11 @@ public class GatewayAutoConfiguration {
 		return new CachingRouteLocator(
 				new CompositeRouteLocator(Flux.fromIterable(routeLocators)));
 	}
+
+	/**
+	 * === RouteLocator end ===
+	 */
+
 
 	@Bean
 	public RouteRefreshListener routeRefreshListener(
@@ -495,7 +515,7 @@ public class GatewayAutoConfiguration {
 	}
 
 	@Bean
-	@ConditionalOnBean({ RateLimiter.class, KeyResolver.class })
+	@ConditionalOnBean({RateLimiter.class, KeyResolver.class})
 	public RequestRateLimiterGatewayFilterFactory requestRateLimiterGatewayFilterFactory(
 			RateLimiter rateLimiter, KeyResolver resolver) {
 		return new RequestRateLimiterGatewayFilterFactory(rateLimiter, resolver);
@@ -766,7 +786,7 @@ public class GatewayAutoConfiguration {
 	}
 
 	@Configuration(proxyBeanMethods = false)
-	@ConditionalOnClass({ HystrixObservableCommand.class, RxReactiveStreams.class })
+	@ConditionalOnClass({HystrixObservableCommand.class, RxReactiveStreams.class})
 	protected static class HystrixConfiguration {
 
 		@Bean
