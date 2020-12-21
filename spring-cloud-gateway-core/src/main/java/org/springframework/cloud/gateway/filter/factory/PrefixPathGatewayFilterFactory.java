@@ -70,7 +70,7 @@ public class PrefixPathGatewayFilterFactory
 				exchange.getAttributes().put(GATEWAY_ALREADY_PREFIXED_ATTR, true);
 
 				ServerHttpRequest req = exchange.getRequest();
-				addOriginalRequestUrl(exchange, req.getURI());
+				addOriginalRequestUrl(exchange, req.getURI()); // 记录原先请求 url 信息
 				String newPath = config.prefix + req.getURI().getRawPath();
 
 				ServerHttpRequest request = req.mutate().path(newPath).build();

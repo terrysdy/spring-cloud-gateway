@@ -3,6 +3,8 @@ package org.springframework.cloud.gateway.sample.customer;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -11,6 +13,7 @@ import org.springframework.cloud.gateway.filter.FilterDefinition;
 import org.springframework.cloud.gateway.handler.predicate.PredicateDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinition;
 import org.springframework.cloud.gateway.route.RouteDefinitionLocator;
+import org.springframework.cloud.gateway.support.RouteMetadataUtils;
 import org.springframework.stereotype.Component;
 
 /**
@@ -38,6 +41,11 @@ public class CustomerRouteDefinitionLocator implements RouteDefinitionLocator {
 		routeDefinition.setFilters(Arrays.asList(filterDefinition, filterDefinition1));
 
 		routeDefinition.setUri(new URI("http://httpbin.org:80"));
+
+		Map<String, Object> metaData = new HashMap<>();
+		// 超时时间
+		metaData.put(RouteMetadataUtils.RESPONSE_TIMEOUT_ATTR, 5000);
+		routeDefinition.setMetadata(metaData);
 
 		return Flux.just(routeDefinition);
 	}

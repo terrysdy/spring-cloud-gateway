@@ -95,7 +95,7 @@ public class FilteringWebHandler implements WebHandler {
 
 		private final int index;
 
-		// 没给 chain 都保留了完整的 filter
+		// 每给 chain 都保留了完整的 filter
 		private final List<GatewayFilter> filters;
 
 		DefaultGatewayFilterChain(List<GatewayFilter> filters) {
